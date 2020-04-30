@@ -48,26 +48,45 @@ pollInterval=125
 def draw(drawerQueue, tkQueue):
     # Flag to indicate that the GUI requested that we exit
     drawerQuitFlag=False
-    
+
     # Create an image and a drawing context to draw on it
     image=Image.new('RGBA', (width, height), (255, 255, 255, 255))
     drawContext=ImageDraw.Draw(image)
+
+    mandelbrot_search_limit=1000
+
+    Z0=(0,0)
 
     # Draw the image.  This is a tight loop that periodically calls
     # periodicallyUpdateImage().
     while not drawerQuitFlag:
         # periodicallyUpdateImage() takes some time.  Call it
         # occasionally, but not every time through the loop.
-        for i in range(10000):
-            # As a simple demo, colour a random pixel using a colour
-            # derived from the position.
-            x=random.randrange(0, width)
-            y=random.randrange(0, height)
-            drawContext.point((x, y),
-                              (int(255*x/(width-1)),
-                               int(255*(height-1-y)/(height-1)),
-                               int(255*(width-1-x)*y/(width-1)/(height-1)),
-                               255))
+        for x in range(width):
+            for y in range(height):
+                # As a simple demo, colour a random pixel using a colour
+                # derived from the position.
+
+                Zi=Z0
+                i=0
+                member=False
+                while i < mandelbrot_search_limit:
+                    Zi=complexSquareAndAdd(Zi, (x,y))
+                    i=i+1
+
+                    if(dist2(Zi)):
+                        member=True
+                        break
+
+
+                if(member):
+                    # TODO: colour the point according to the number of iteration
+                    drawContext.point((x, y),
+                                      (int(255*x/(width-1)),
+                                       int(255*(height-1-y)/(height-1)),
+                                       int(255*(width-1-x)*y/(width-1)/(height-1)),
+                                       255))
+
         # periodicallyUpdateImage is called periodically to update the
         # image in the GUI.  The function returns true if the drawing
         # process must exit.  periodicallyUpdateImage must not be
@@ -79,6 +98,14 @@ def draw(drawerQueue, tkQueue):
     # periodicallyUpdateImage() returned True.
     if not drawerQuitFlag:
         notifyImageComplete(drawerQueue, tkQueue, image)
+
+def dist2(a):
+    return a[0]*a[0] + a[1]*a[1] > 4
+
+
+def complexSquareAndAdd(a, b):
+    return (a[0]*a[0] - a[1]*a[1] + b[0], 2*a[0]*a[1] + b[1])
+
 
 # The code above this comment is all that needs to be understood to
 # generate images.  Read on to understand the inner workings if you
@@ -302,8 +329,8 @@ class PyMPCanvas(tk.Frame):
                 pass
         self.image.save(outputFile)
         outputFile.close()
-        self.displayStatus("Image saved to "+fileName)        
-        
+        self.displayStatus("Image saved to "+fileName)
+
 if __name__ == '__main__':
     # Configure the multiprocessing module
     multiprocessing.set_start_method('spawn')
