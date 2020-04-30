@@ -61,7 +61,7 @@ def draw(drawerQueue, tkQueue):
     startingPoints=[A,B,C]
 
     Pi=A
-
+ 
     # Draw the image.  This is a tight loop that periodically calls
     # periodicallyUpdateImage().
     while not drawerQuitFlag:
