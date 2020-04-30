@@ -48,26 +48,46 @@ pollInterval=125
 def draw(drawerQueue, tkQueue):
     # Flag to indicate that the GUI requested that we exit
     drawerQuitFlag=False
-    
+
     # Create an image and a drawing context to draw on it
     image=Image.new('RGBA', (width, height), (255, 255, 255, 255))
     drawContext=ImageDraw.Draw(image)
 
+
+    A=(random.randrange(width/4, 3*width/4), random.randrange(0, height/10))
+    B=(random.randrange(0, width/10), random.randrange(3*height/4, height))
+    C=(random.randrange(9*width/10, width), random.randrange(3*height/4, height))
+
+    startingPoints=[A,B,C]
+
+    Pi=A
+
     # Draw the image.  This is a tight loop that periodically calls
     # periodicallyUpdateImage().
     while not drawerQuitFlag:
+
         # periodicallyUpdateImage() takes some time.  Call it
         # occasionally, but not every time through the loop.
         for i in range(10000):
             # As a simple demo, colour a random pixel using a colour
             # derived from the position.
-            x=random.randrange(0, width)
-            y=random.randrange(0, height)
+            # x=random.randrange(0, width)
+            # y=random.randrange(0, height)
+
+            P=startingPoints[random.randint(0,2)]
+            x=(P[0]+Pi[0])/2
+            y=(P[1]+Pi[1])/2
+            Pi=(x,y)
+
+
             drawContext.point((x, y),
                               (int(255*x/(width-1)),
                                int(255*(height-1-y)/(height-1)),
                                int(255*(width-1-x)*y/(width-1)/(height-1)),
                                255))
+
+
+
         # periodicallyUpdateImage is called periodically to update the
         # image in the GUI.  The function returns true if the drawing
         # process must exit.  periodicallyUpdateImage must not be
@@ -79,6 +99,8 @@ def draw(drawerQueue, tkQueue):
     # periodicallyUpdateImage() returned True.
     if not drawerQuitFlag:
         notifyImageComplete(drawerQueue, tkQueue, image)
+
+
 
 # The code above this comment is all that needs to be understood to
 # generate images.  Read on to understand the inner workings if you
@@ -302,8 +324,8 @@ class PyMPCanvas(tk.Frame):
                 pass
         self.image.save(outputFile)
         outputFile.close()
-        self.displayStatus("Image saved to "+fileName)        
-        
+        self.displayStatus("Image saved to "+fileName)
+
 if __name__ == '__main__':
     # Configure the multiprocessing module
     multiprocessing.set_start_method('spawn')
